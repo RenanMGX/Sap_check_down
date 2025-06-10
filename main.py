@@ -23,4 +23,8 @@ if __name__ == "__main__":
         del sap
         sleep(1)
     
-    SapCheck.fechar_app_sap() 
+    try:
+        SapCheck.fechar_app_sap() 
+    except:
+        with open("log.txt", "a") as log_file:
+            log_file.write(traceback.format_exc())
