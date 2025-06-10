@@ -94,6 +94,7 @@ class SapCheck:
                 if tarefa in process.info['name'].lower():
                     process.kill()
                     print(f"processo '{process.info['name']}' foi finalizada!")
+                    os.environ['date'] = datetime.now().isoformat()
         
 
 if __name__ == "__main__":
