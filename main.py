@@ -22,3 +22,5 @@ if __name__ == "__main__":
         count += 1
         del sap
         sleep(1)
+    
+    SapCheck.fechar_app_sap() 
