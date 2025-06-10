@@ -46,6 +46,7 @@ class SapCheck:
             application: win32com.client.CDispatch = SapGuiAuto.GetScriptingEngine# type: ignore
         except:
             print("O SAP GUI não está aberto ou o SAP GUI Scripting não está habilitado.")
+            SapCheck.encerrando_tarefa("saplogon")
             return
         
         esta_aberto = False
@@ -62,13 +63,18 @@ class SapCheck:
                 
         if not esta_aberto:
             print("O SAP GUI não está em sessão então fehando.")
-            for process in psutil.process_iter(['name']):
-                if "saplogon" in process.info['name'].lower():
-                    process.kill()
+            SapCheck.encerrando_tarefa("saplogon")
             return
         else:
             print("O sap está em sessão")
                 
+        
+        
+    @staticmethod
+    def encerrando_tarefa(tarefa:str):
+            for process in psutil.process_iter(['name']):
+                if tarefa in process.info['name'].lower():
+                    process.kill()
         
 
 if __name__ == "__main__":
