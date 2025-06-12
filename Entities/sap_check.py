@@ -5,6 +5,7 @@ import win32com.client
 from time import sleep 
 import traceback
 import psutil
+import win32process
 
 class SapCheck:
     @property
@@ -45,8 +46,11 @@ class SapCheck:
             SapGuiAuto: win32com.client.CDispatch = win32com.client.GetObject("SAPGUI")# type: ignore
             application: win32com.client.CDispatch = SapGuiAuto.GetScriptingEngine# type: ignore
         except:
-            print("O SAP GUI não está aberto ou o SAP GUI Scripting não está habilitado.")
-            SapCheck.encerrando_tarefa("saplogon")
+            if contar_janelas_sap() > 1:
+                print("O SAP GUI não está aberto ou o SAP GUI Scripting não está habilitado.")
+                SapCheck.encerrando_tarefa("saplogon")
+            else:
+                print("O SAP está com mais de 1 janela aberta então não sera finalizado")
             return
         
         esta_aberto = False
@@ -76,18 +80,46 @@ class SapCheck:
                 if tarefa in process.info['name'].lower():
                     process.kill()
         
+def contar_janelas_sap():
+    def enum_windows():
+        def callback(hwnd, windows):
+            if win32gui.IsWindowVisible(hwnd):
+                _, pid = win32process.GetWindowThreadProcessId(hwnd)
+                try:
+                    proc = psutil.Process(pid)
+                    windows.append((proc.name(), win32gui.GetWindowText(hwnd)))
+                except psutil.NoSuchProcess:
+                    pass
+            return True
+
+        windows = []
+        win32gui.EnumWindows(callback, windows)
+        return windows
+
+    janelas_sap = 0
+    for name, title in enum_windows():
+        if "sap" in name.lower():
+            janelas_sap += 1
+
+    return janelas_sap
+
+
 
 if __name__ == "__main__":
+    #print(contar_janelas_sap())
     sap = SapCheck()
-    janela = sap.find_per_title("SAP GUI for Windows 770")
-    print(janela)
-    if janela:
-        sap.para_frente(janela[0])
-        sleep(1)
-        sap.para_frente(janela[0])
-        sap.para_frente(janela[0])
-        sleep(1)
-        sap.para_frente(janela[0])
+    sap.fechar_app_sap()
+    
+      
+    # janela = sap.find_per_title("SAP GUI for Windows 770")
+    # print(janela)
+    # if janela:
+    #     sap.para_frente(janela[0])
+    #     sleep(1)
+    #     sap.para_frente(janela[0])
+    #     sap.para_frente(janela[0])
+    #     sleep(1)
+    #     sap.para_frente(janela[0])
 
     
     
