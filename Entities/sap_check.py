@@ -57,6 +57,8 @@ class SapCheck:
             if datetime.now() >= (time_date + relativedelta(minutes=time_to_close)):
                 if contar_janelas_sap() > 1:
                     SapCheck.encerrando_tarefa("saplogon")
+                elif contar_janelas_sap() <= 0:
+                    print("Nenhuma janela para fechar")
                 else:
                     print("O SAP está com mais de 1 janela aberta então não sera finalizado")
                 os.environ['date'] = datetime.now().isoformat()
