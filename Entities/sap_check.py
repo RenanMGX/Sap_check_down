@@ -6,6 +6,9 @@ from time import sleep
 import traceback
 import psutil
 import win32process
+import os
+from datetime import datetime, timedelta
+from dateutil.relativedelta import relativedelta
 
 class SapCheck:
     @property
@@ -41,16 +44,24 @@ class SapCheck:
         win32api.keybd_event(win32con.VK_RETURN, 0, 0, 0)
     
     @staticmethod
-    def fechar_app_sap():
+    def fechar_app_sap(time_to_close:int=2):
+        if os.environ['date'] == "":
+            os.environ['date'] = datetime.now().isoformat()
+            
         try:
             SapGuiAuto: win32com.client.CDispatch = win32com.client.GetObject("SAPGUI")# type: ignore
             application: win32com.client.CDispatch = SapGuiAuto.GetScriptingEngine# type: ignore
         except:
-            if contar_janelas_sap() > 1:
-                print("O SAP GUI não está aberto ou o SAP GUI Scripting não está habilitado.")
-                SapCheck.encerrando_tarefa("saplogon")
+            print("O SAP GUI não está aberto ou o SAP GUI Scripting não está habilitado.")
+            time_date = datetime.fromisoformat(os.environ['date'])
+            if datetime.now() >= (time_date + relativedelta(minutes=time_to_close)):
+                if contar_janelas_sap() > 1:
+                    SapCheck.encerrando_tarefa("saplogon")
+                else:
+                    print("O SAP está com mais de 1 janela aberta então não sera finalizado")
             else:
-                print("O SAP está com mais de 1 janela aberta então não sera finalizado")
+                print(f"precisa estar aberto há '{time_to_close}' para ser encerrado!")
+                print(f"falta {(time_date + relativedelta(minutes=time_to_close)) - datetime.now()} minutos")
             return
         
         esta_aberto = False
@@ -60,16 +71,23 @@ class SapCheck:
                 esta_aberto = True
             except Exception as e:
                 if 'The enumerator of the collection cannot find an element with the specified index.' in traceback.format_exc():
-                    print(f"No SAP GUI session found. {i}")
+                    #print(f"No SAP GUI session found. {i}")
                     continue
                 else:
                     raise e
                 
         if not esta_aberto:
-            print("O SAP GUI não está em sessão então fehando.")
-            SapCheck.encerrando_tarefa("saplogon")
+            print("O SAP GUI não está em sessão então fechando.")
+            time_date = datetime.fromisoformat(os.environ['date'])
+            if datetime.now() >= (time_date + relativedelta(minutes=time_to_close)):
+                SapCheck.encerrando_tarefa("saplogon")
+            else:
+                print(f"precisa estar aberto há '{time_to_close}' para ser encerrado!")
+                print(f"falta {(time_date + relativedelta(minutes=time_to_close)) - datetime.now()} minutos")
+                
             return
         else:
+            os.environ['date'] = datetime.now().isoformat()
             print("O sap está em sessão")
                 
         
@@ -79,6 +97,8 @@ class SapCheck:
             for process in psutil.process_iter(['name']):
                 if tarefa in process.info['name'].lower():
                     process.kill()
+                    print(f"processo '{process.info['name']}' foi finalizada!")
+                    os.environ['date'] = datetime.now().isoformat()
         
 def contar_janelas_sap():
     def enum_windows():
@@ -106,6 +126,7 @@ def contar_janelas_sap():
 
 
 if __name__ == "__main__":
+    os.environ['date'] = datetime.now().isoformat()
     #print(contar_janelas_sap())
     sap = SapCheck()
     sap.fechar_app_sap()
