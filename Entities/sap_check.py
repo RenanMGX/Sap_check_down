@@ -55,7 +55,7 @@ class SapCheck:
             print("O SAP GUI não está aberto ou o SAP GUI Scripting não está habilitado.")
             time_date = datetime.fromisoformat(os.environ['date'])
             if datetime.now() >= (time_date + relativedelta(minutes=time_to_close)):
-                if contar_janelas_sap() > 1:
+                if contar_janelas_sap() == 1:
                     SapCheck.encerrando_tarefa("saplogon")
                 elif contar_janelas_sap() <= 0:
                     print("Nenhuma janela para fechar")
@@ -131,11 +131,16 @@ def contar_janelas_sap():
 
 if __name__ == "__main__":
     os.environ['date'] = datetime.now().isoformat()
-    #print(contar_janelas_sap())
-    sap = SapCheck()
-    sap.fechar_app_sap()
+    print(contar_janelas_sap())
+    #sap = SapCheck()
+    #sap.fechar_app_sap()
     
-      
+    if contar_janelas_sap() == 1:
+        print("fechando sap")
+    elif contar_janelas_sap() <= 0:
+        print("Nenhuma janela para fechar")
+    else:
+        print("O SAP está com mais de 1 janela aberta então não sera finalizado")
     # janela = sap.find_per_title("SAP GUI for Windows 770")
     # print(janela)
     # if janela:
