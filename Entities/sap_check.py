@@ -59,6 +59,7 @@ class SapCheck:
                     SapCheck.encerrando_tarefa("saplogon")
                 else:
                     print("O SAP está com mais de 1 janela aberta então não sera finalizado")
+                os.environ['date'] = datetime.now().isoformat()
             else:
                 print(f"precisa estar aberto há '{time_to_close}' para ser encerrado!")
                 print(f"falta {(time_date + relativedelta(minutes=time_to_close)) - datetime.now()} minutos")
@@ -81,6 +82,7 @@ class SapCheck:
             time_date = datetime.fromisoformat(os.environ['date'])
             if datetime.now() >= (time_date + relativedelta(minutes=time_to_close)):
                 SapCheck.encerrando_tarefa("saplogon")
+                os.environ['date'] = datetime.now().isoformat()
             else:
                 print(f"precisa estar aberto há '{time_to_close}' para ser encerrado!")
                 print(f"falta {(time_date + relativedelta(minutes=time_to_close)) - datetime.now()} minutos")
@@ -98,7 +100,7 @@ class SapCheck:
                 if tarefa in process.info['name'].lower():
                     process.kill()
                     print(f"processo '{process.info['name']}' foi finalizada!")
-                    os.environ['date'] = datetime.now().isoformat()
+                    
         
 def contar_janelas_sap():
     def enum_windows():
