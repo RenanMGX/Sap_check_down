@@ -1,1 +1,0 @@
-PROJECT_NAME:str = "coleta de informações da API ClickCompliance"
